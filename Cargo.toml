@@ -6,8 +6,9 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-
 [build-dependencies]
-bindgen = "0.31"
+bindgen = "0.51"
+
+[dev-dependencies]
+libc = "0.2"
 
