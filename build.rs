@@ -7,10 +7,10 @@ fn main() {
     let libv4l = pkg_config::probe_library("libv4l2").unwrap();
 
     // Path to directories of C header
-    let include_dirs: Vec<PathBuf> = vec![
-        PathBuf::from(&env::var("LIBCLANG_INCLUDE_PATH")
-            .expect("LIBCLANG_INCLUDE_PATH like: /usr/include/clang/9.0.0/include"))
-    ];
+    let include_dirs: Vec<PathBuf> = vec![PathBuf::from(
+        &env::var("LIBCLANG_INCLUDE_PATH")
+            .expect("LIBCLANG_INCLUDE_PATH like: /usr/include/clang/9.0.0/include"),
+    )];
 
     let include_args: Vec<_> = include_dirs
         .iter()
