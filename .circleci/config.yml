@@ -1,0 +1,27 @@
+version: 2
+jobs:
+  build:
+    working_directory: /tmp/libv4l_sys
+    docker:
+      - image: rust:1.36.0-buster
+        environment:
+          LIBCLANG_INCLUDE_PATH: /usr/include/clang/7/include
+    steps:
+      - checkout
+      - run: git merge --no-edit origin/master
+      - run:
+          name: Setup Packages
+          command: |
+            apt-get update -y
+            apt-get install -y pkg-config libclang-7-dev libv4l-dev
+      - run:
+          name: Build crate
+          command: |
+            cargo build
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+
