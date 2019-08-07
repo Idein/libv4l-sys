@@ -4,6 +4,8 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
+    let libv4l = pkg_config::probe_library("libv4l").unwrap();
+
     // Path to directories of C header
     let include_dirs: Vec<PathBuf> = vec![
         PathBuf::from(&env::var("LIBCLANG_INCLUDE_PATH")
@@ -12,6 +14,7 @@ fn main() {
 
     let include_args: Vec<_> = include_dirs
         .iter()
+        .chain(libv4l.include_paths.iter())
         .flat_map(|path| vec!["-I", path.to_str().unwrap()])
         .collect();
 
