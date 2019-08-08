@@ -28,7 +28,7 @@ fn strerror() -> String {
         .into()
 }
 
-fn xioctl(fd: libc::c_int, request: libc::c_uint, arg: *mut libc::c_void) {
+fn xioctl(fd: libc::c_int, request: libc::c_uint, arg: *mut libc::c_void) -> libc::c_int {
     let mut r = 0;
 
     loop {
@@ -36,14 +36,16 @@ fn xioctl(fd: libc::c_int, request: libc::c_uint, arg: *mut libc::c_void) {
         if r == -1 && ((errno!() == libc::EINTR) || (errno!() == libc::EAGAIN)) {
             continue;
         } else {
-            break
+            break;
         }
     }
-
+    r
+    /*
     if r == -1 {
         error!("error {}, {}", errno!(), strerror());
         panic!()
     }
+    */
 }
 
 fn main() {
@@ -53,7 +55,11 @@ fn main() {
     let dev_name = CString::new("/dev/video0").unwrap();
 
     let fd = unsafe {
-        let fd = v4l::v4l2_open(dev_name.as_ptr(), libc::O_RDWR /* | libc::O_NONBLOCK */, 0);
+        let fd = v4l::v4l2_open(
+            dev_name.as_ptr(),
+            libc::O_RDWR, /* | libc::O_NONBLOCK */
+            0,
+        );
         if fd == -1 {
             error!("open device error: {}: {}", fd, strerror());
             panic!()
@@ -64,6 +70,62 @@ fn main() {
     let V4L2_PIX_FMT_RGB24: u32 =
         ((b'R' as u32) << 0) | ((b'G' as u32) << 8) | ((b'B' as u32) << 16) | ((b'3' as u32) << 24);
 
+    /*
+    VIDIOC_ENUM_FRAMESIZES
+    ==> _IOWR('V', 74, struct v4l2_frmsizeenum)
+    ...
+    ==> ((3U  << 30)  |
+         ('V' << 8) |
+         74 |
+         (sizeof(v4l2_frmsizeenum) << 16))
+    */
+    let VIDIOC_ENUM_FRAMESIZES: libc::c_uint = ((3 as libc::c_uint) << 30)
+        | ((b'V' as libc::c_uint) << 8)
+        | (74 as libc::c_uint)
+        | ((mem::size_of::<v4l::v4l2_frmsizeenum>() as libc::c_uint) << 16);
+    let mut framesize = unsafe {
+        let mut framesize: v4l::v4l2_frmsizeenum = mem::zeroed();
+        framesize.pixel_format = V4L2_PIX_FMT_RGB24;
+        framesize
+    };
+    let mut idx = 0;
+    xioctl(
+        fd,
+        VIDIOC_ENUM_FRAMESIZES,
+        &mut framesize as *mut _ as *mut libc::c_void,
+    );
+    if framesize.type_ == v4l::v4l2_frmivaltypes_V4L2_FRMIVAL_TYPE_DISCRETE {
+        unsafe {
+            loop {
+                debug!(
+                    "discrete: {}x{}",
+                    framesize.__bindgen_anon_1.discrete.width,
+                    framesize.__bindgen_anon_1.discrete.height
+                );
+                idx += 1;
+                if xioctl(
+                    fd,
+                    VIDIOC_ENUM_FRAMESIZES,
+                    &mut framesize as *mut _ as *mut libc::c_void,
+                ) == -1
+                {
+                    break;
+                }
+            }
+        }
+    } else {
+        let stepwise = unsafe { framesize.__bindgen_anon_1.stepwise };
+        debug!(
+            "[{},{}]({})x[{},{}]({})",
+            stepwise.min_width,
+            stepwise.max_width,
+            stepwise.step_width,
+            stepwise.min_height,
+            stepwise.max_height,
+            stepwise.step_height
+        );
+    }
+
     let mut fmt = unsafe {
         let mut fmt: v4l::v4l2_format = mem::zeroed();
         fmt.type_ = v4l::v4l2_buf_type_V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -73,6 +135,24 @@ fn main() {
         fmt.fmt.pix.field = v4l::v4l2_field_V4L2_FIELD_INTERLACED;
         fmt
     };
+
+    /*
+    VIDIOC_G_FMT
+    ==> _IOWR('V', 4, struct v4l2_format)
+    ...
+    ==> ((3U  << 30)  |
+         ('V' << 8) |
+         4 |
+         (sizeof(v4l2_format) << 16))
+    */
+    /*
+    let VIDIOC_G_FMT: libc::c_uint = ((3 as libc::c_uint) << 30)
+        | ((b'V' as libc::c_uint) << 8)
+        | (4 as libc::c_uint)
+        | ((mem::size_of::<v4l::v4l2_format>() as libc::c_uint) << 16);
+
+    xioctl(fd, VIDIOC_G_FMT, &mut fmt as *mut _ as *mut libc::c_void);
+    */
 
     /*
     VIDIOC_S_FMT
