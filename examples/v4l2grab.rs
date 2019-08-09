@@ -158,11 +158,7 @@ fn main() {
     let dev_name = CString::new("/dev/video0").unwrap();
 
     let fd = unsafe {
-        let fd = v4l::v4l2_open(
-            dev_name.as_ptr(),
-            libc::O_RDWR, /* | libc::O_NONBLOCK */
-            0,
-        );
+        let fd = v4l::v4l2_open(dev_name.as_ptr(), libc::O_RDWR | libc::O_NONBLOCK, 0);
         if fd == -1 {
             error!("open device error: {}: {}", fd, strerror());
             panic!()
@@ -460,6 +456,30 @@ fn main() {
 
     for i in 0..20 {
         debug!("0..20: {}", i);
+
+        unsafe {
+            let mut fds: libc::fd_set = mem::zeroed();
+            loop {
+                libc::FD_ZERO(&mut fds);
+                libc::FD_SET(fd, &mut fds);
+                let mut tv = libc::timeval {
+                    tv_sec: 2,
+                    tv_usec: 0,
+                };
+                let r = libc::select(fd + 1, &mut fds, ptr::null_mut(), ptr::null_mut(), &mut tv);
+                if !(r == -1 && (errno!() == libc::EINTR)) {
+                    if cfg!(target_os = "linux") {
+                        debug!("time left: {}.{:06}", tv.tv_sec, tv.tv_usec);
+                    }
+                    break;
+                }
+                if r == -1 {
+                    error!("select error {}, {}", errno!(), strerror());
+                    panic!()
+                }
+            }
+        }
+
         let mut buf = unsafe {
             let mut buf: v4l::v4l2_buffer = mem::zeroed();
             buf.type_ = v4l::v4l2_buf_type_V4L2_BUF_TYPE_VIDEO_CAPTURE;
