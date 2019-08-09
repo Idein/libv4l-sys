@@ -2,7 +2,6 @@ use std::ffi::{CStr, CString};
 use std::fmt;
 use std::fs;
 use std::io::Write;
-use std::iter::Iterator;
 use std::mem;
 use std::ptr;
 use std::slice;
@@ -26,95 +25,6 @@ struct Framesize {
 impl fmt::Display for Framesize {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}x{}", self.width, self.height)
-    }
-}
-
-#[derive(Debug, Clone)]
-enum FramesizeKind {
-    Discrete(Vec<Framesize>),
-    Stepwise {
-        min_width: u32,
-        max_width: u32,
-        min_height: u32,
-        max_height: u32,
-        step_width: u32,
-        step_height: u32,
-    },
-}
-
-impl FramesizeKind {
-    fn iter(&self) -> FramesizeIter {
-        FramesizeIter::new(self.clone())
-    }
-}
-
-#[derive(Debug, Clone)]
-struct FramesizeIter {
-    kind: FramesizeKind,
-    next: Option<Framesize>,
-}
-
-impl FramesizeIter {
-    fn new(kind: FramesizeKind) -> Self {
-        use FramesizeKind::*;
-        match kind {
-            Discrete(mut fs) => {
-                let next = fs.pop();
-                FramesizeIter {
-                    kind: Discrete(fs),
-                    next,
-                }
-            }
-            Stepwise {
-                min_width,
-                min_height,
-                ..
-            } => FramesizeIter {
-                kind,
-                next: Some(Framesize {
-                    width: min_width,
-                    height: min_height,
-                }),
-            },
-        }
-    }
-}
-
-impl Iterator for FramesizeIter {
-    type Item = Framesize;
-    fn next(&mut self) -> Option<Self::Item> {
-        use FramesizeKind::*;
-        let curr = self.next.clone();
-        if let Some(ref frm) = &curr {
-            self.next = match &mut self.kind {
-                Discrete(ref mut fs) => fs.pop(),
-                Stepwise {
-                    ref min_width,
-                    ref max_width,
-                    ref step_width,
-                    ref max_height,
-                    ref step_height,
-                    ..
-                } => {
-                    if frm.width < *max_width {
-                        Some(Framesize {
-                            width: frm.width + step_width,
-                            height: frm.height,
-                        })
-                    } else {
-                        if frm.height + step_height < *max_height {
-                            Some(Framesize {
-                                width: *min_width,
-                                height: frm.height + step_height,
-                            })
-                        } else {
-                            None
-                        }
-                    }
-                }
-            }
-        };
-        curr
     }
 }
 
@@ -170,107 +80,11 @@ fn main() {
     let V4L2_PIX_FMT_RGB24: u32 =
         ((b'R' as u32) << 0) | ((b'G' as u32) << 8) | ((b'B' as u32) << 16) | ((b'3' as u32) << 24);
 
-    /*
-    VIDIOC_ENUM_FRAMESIZES
-    ==> _IOWR('V', 74, struct v4l2_frmsizeenum)
-    ...
-    ==> ((3U  << 30)  |
-         ('V' << 8) |
-         74 |
-         (sizeof(v4l2_frmsizeenum) << 16))
-    */
-    let VIDIOC_ENUM_FRAMESIZES: libc::c_uint = ((3 as libc::c_uint) << 30)
-        | ((b'V' as libc::c_uint) << 8)
-        | (74 as libc::c_uint)
-        | ((mem::size_of::<v4l::v4l2_frmsizeenum>() as libc::c_uint) << 16);
-    let mut framesize = unsafe {
-        let mut framesize: v4l::v4l2_frmsizeenum = mem::zeroed();
-        framesize.pixel_format = V4L2_PIX_FMT_RGB24;
-        framesize
-    };
-    xioctl(
-        fd,
-        VIDIOC_ENUM_FRAMESIZES,
-        &mut framesize as *mut _ as *mut libc::c_void,
-    );
-    let supported_framesize =
-        if framesize.type_ == v4l::v4l2_frmivaltypes_V4L2_FRMIVAL_TYPE_DISCRETE {
-            let mut frame_sizes = vec![];
-            loop {
-                let discrete = unsafe { framesize.__bindgen_anon_1.discrete };
-                debug!("discrete: {}x{}", discrete.width, discrete.height);
-                frame_sizes.push(Framesize {
-                    width: discrete.width,
-                    height: discrete.height,
-                });
-                framesize.index += 1;
-                if rioctl(
-                    fd,
-                    VIDIOC_ENUM_FRAMESIZES,
-                    &mut framesize as *mut _ as *mut libc::c_void,
-                ) == -1
-                {
-                    break;
-                }
-                assert!(framesize.type_ == v4l::v4l2_frmivaltypes_V4L2_FRMIVAL_TYPE_DISCRETE);
-                let discrete = unsafe { framesize.__bindgen_anon_1.discrete };
-                frame_sizes.push(Framesize {
-                    width: discrete.width,
-                    height: discrete.height,
-                });
-            }
-            FramesizeKind::Discrete(frame_sizes)
-        } else {
-            let stepwise = unsafe { framesize.__bindgen_anon_1.stepwise };
-            debug!(
-                "[{},{}]({})x[{},{}]({})",
-                stepwise.min_width,
-                stepwise.max_width,
-                stepwise.step_width,
-                stepwise.min_height,
-                stepwise.max_height,
-                stepwise.step_height
-            );
-            FramesizeKind::Stepwise {
-                min_width: stepwise.min_width,
-                max_width: stepwise.max_width,
-                min_height: stepwise.min_height,
-                max_height: stepwise.max_height,
-                step_width: stepwise.step_width,
-                step_height: stepwise.step_height,
-            }
-        };
-
-    debug!("supported_framesize: {:?}", supported_framesize);
-
-    /*
-    VIDIOC_G_FMT
-    ==> _IOWR('V', 4, struct v4l2_format)
-    ...
-    ==> ((3U  << 30)  |
-         ('V' << 8) |
-         4 |
-         (sizeof(v4l2_format) << 16))
-    */
-    /*
-    let VIDIOC_G_FMT: libc::c_uint = ((3 as libc::c_uint) << 30)
-        | ((b'V' as libc::c_uint) << 8)
-        | (4 as libc::c_uint)
-        | ((mem::size_of::<v4l::v4l2_format>() as libc::c_uint) << 16);
-
-    xioctl(fd, VIDIOC_G_FMT, &mut fmt as *mut _ as *mut libc::c_void);
-    */
-
-    let min_frame = supported_framesize
-        .iter()
-        .min_by_key(|frm| frm.width * frm.height)
-        .expect("there is no supported frame size");
-    debug!("min_frame: {}", min_frame);
     let mut fmt = unsafe {
         let mut fmt: v4l::v4l2_format = mem::zeroed();
         fmt.type_ = v4l::v4l2_buf_type_V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        fmt.fmt.pix.width = min_frame.width;
-        fmt.fmt.pix.height = min_frame.height;
+        fmt.fmt.pix.width = 320;
+        fmt.fmt.pix.height = 240;
         fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB24;
         fmt.fmt.pix.field = v4l::v4l2_field_V4L2_FIELD_INTERLACED;
         fmt
