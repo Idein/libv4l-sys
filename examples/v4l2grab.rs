@@ -132,7 +132,7 @@ fn strerror() -> String {
 }
 
 fn xioctl(fd: libc::c_int, request: libc::c_uint, arg: *mut libc::c_void) -> libc::c_int {
-    let mut r = 0;
+    let mut r;
 
     loop {
         r = unsafe { v4l::v4l2_ioctl(fd, request, arg) };
