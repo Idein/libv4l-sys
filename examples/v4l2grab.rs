@@ -131,7 +131,7 @@ fn strerror() -> String {
         .into()
 }
 
-fn xioctl(fd: libc::c_int, request: libc::c_uint, arg: *mut libc::c_void) -> libc::c_int {
+fn rioctl(fd: libc::c_int, request: libc::c_uint, arg: *mut libc::c_void) -> libc::c_int {
     let mut r;
 
     loop {
@@ -143,12 +143,13 @@ fn xioctl(fd: libc::c_int, request: libc::c_uint, arg: *mut libc::c_void) -> lib
         }
     }
     r
-    /*
-    if r == -1 {
+}
+
+fn xioctl(fd: libc::c_int, request: libc::c_uint, arg: *mut libc::c_void) {
+    if rioctl(fd, request, arg) == -1 {
         error!("error {}, {}", errno!(), strerror());
         panic!()
     }
-    */
 }
 
 fn main() {
@@ -187,15 +188,11 @@ fn main() {
         framesize.pixel_format = V4L2_PIX_FMT_RGB24;
         framesize
     };
-    if xioctl(
+    xioctl(
         fd,
         VIDIOC_ENUM_FRAMESIZES,
         &mut framesize as *mut _ as *mut libc::c_void,
-    ) == -1
-    {
-        error!("error {}, {}", errno!(), strerror());
-        panic!()
-    }
+    );
     let supported_framesize =
         if framesize.type_ == v4l::v4l2_frmivaltypes_V4L2_FRMIVAL_TYPE_DISCRETE {
             let mut frame_sizes = vec![];
@@ -207,7 +204,7 @@ fn main() {
                     height: discrete.height,
                 });
                 framesize.index += 1;
-                if xioctl(
+                if rioctl(
                     fd,
                     VIDIOC_ENUM_FRAMESIZES,
                     &mut framesize as *mut _ as *mut libc::c_void,
