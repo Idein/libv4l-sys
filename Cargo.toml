@@ -1,8 +1,21 @@
 [package]
 name = "libv4l-sys"
+description = "A FFI to libv4l"
 version = "0.1.0"
-authors = ["eldesh <nephits@gmail.com>"]
+authors = ["takayuki goto <takayuki@idein.jp>"]
 edition = "2018"
+license = "Apache-2.0"
+homepage = "https://github.com/idein/libv4l-sys"
+repository = "https://github.com/idein/libv4l-sys"
+documentation = "https://docs.rs/libv4l-sys"
+readme = "README.md"
+keywords = ["video4linux", "video"]
+categories = ["external-ffi-bindings", "multimedia::images", "multimedia::video"]
+
+[badges]
+circle-ci = { repository = "idein/libv4l-sys" }
+maintenance = { status = "experimental" }
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
