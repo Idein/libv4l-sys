@@ -187,7 +187,6 @@ fn main() {
         framesize.pixel_format = V4L2_PIX_FMT_RGB24;
         framesize
     };
-    let mut idx = 0;
     if xioctl(
         fd,
         VIDIOC_ENUM_FRAMESIZES,
@@ -207,7 +206,7 @@ fn main() {
                     width: discrete.width,
                     height: discrete.height,
                 });
-                idx += 1;
+                framesize.index += 1;
                 if xioctl(
                     fd,
                     VIDIOC_ENUM_FRAMESIZES,
