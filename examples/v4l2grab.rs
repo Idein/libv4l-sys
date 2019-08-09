@@ -360,9 +360,7 @@ fn main() {
     xioctl(fd, VIDIOC_REQBUFS, &mut req as *mut _ as *mut libc::c_void);
 
     let mut buffers = Vec::new();
-    debug!("req: {:?}", req);
     for n_buffers in 0..req.count {
-        debug!("n_buffers: {}", n_buffers);
         let mut buf = unsafe {
             let mut buf: v4l::v4l2_buffer = mem::zeroed();
             buf.type_ = v4l::v4l2_buf_type_V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -390,8 +388,6 @@ fn main() {
             | (9 as libc::c_uint)
             | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_uint) << 16);
         xioctl(fd, VIDIOC_QUERYBUF, &mut buf as *mut _ as *mut libc::c_void);
-        debug!("buf.length: {}", buf.length);
-        debug!("buf.m.offset: {}", unsafe { buf.m.offset });
         let buffer = unsafe {
             buffer {
                 start: v4l::v4l2_mmap(
@@ -414,7 +410,6 @@ fn main() {
     }
 
     for i in 0..buffers.len() {
-        debug!("buffers: {}", i);
         let mut buf = unsafe {
             let mut buf: v4l::v4l2_buffer = mem::zeroed();
             buf.type_ = v4l::v4l2_buf_type_V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -427,11 +422,9 @@ fn main() {
             | ((b'V' as libc::c_uint) << 8)
             | (15 as libc::c_uint)
             | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_uint) << 16);
-        debug!("VIDIOC_QBUF");
         xioctl(fd, VIDIOC_QBUF, &mut buf as *mut _ as *mut libc::c_void);
     }
 
-    debug!("V4L2_BUF_TYPE_VIDEO_CAPTURE");
     let mut type_ = v4l::v4l2_buf_type_V4L2_BUF_TYPE_VIDEO_CAPTURE;
     /*
     VIDIOC_STREAMON
@@ -447,7 +440,6 @@ fn main() {
         | ((b'V' as libc::c_uint) << 8)
         | (18 as libc::c_uint)
         | ((mem::size_of::<libc::c_int>() as libc::c_uint) << 16);
-    debug!("VIDIOC_STREAMON: {:0X}", VIDIOC_STREAMON);
     xioctl(
         fd,
         VIDIOC_STREAMON,
