@@ -91,6 +91,21 @@ pub mod codes {
         iowr!(VIDEODEV2_IOC_MAGIC, 78, crate::v4l2_encoder_cmd);
 }
 
+/// Four-character-code (FOURCC)
+#[macro_export]
+macro_rules! fourcc {
+    ($a:expr, $b:expr, $c:expr, $d:expr) => {
+        ($a as u32) | (($b as u32) << 8) | (($c as u32) << 16) | (($d as u32) << 24)
+    };
+}
+
+#[macro_export]
+macro_rules! fourcc_be {
+    ($a:expr, $b:expr, $c:expr, $d:expr) => {
+        fourcc!($a, $b, $c, $d) | ((1 as u32) << 31)
+    };
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
