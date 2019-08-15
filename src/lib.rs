@@ -3,4 +3,6 @@
 #![allow(non_snake_case)]
 
 pub mod ioctl;
+pub mod videodev2;
+
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
