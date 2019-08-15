@@ -90,3 +90,60 @@ pub mod codes {
     pub const VIDIOC_TRY_ENCODER_CMD: libc::c_ulong =
         iowr!(VIDEODEV2_IOC_MAGIC, 78, crate::v4l2_encoder_cmd);
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate as v4l;
+    use std::mem;
+
+    fn cmp_with_naive() {
+        let VIDIOC_S_FMT: libc::c_ulong = ((3 as libc::c_ulong) << 30)
+            | ((b'V' as libc::c_ulong) << 8)
+            | (5 as libc::c_ulong)
+            | ((mem::size_of::<v4l::v4l2_format>() as libc::c_ulong) << 16);
+        assert_eq!(codes::VIDIOC_S_FMT, VIDIOC_S_FMT);
+
+        let VIDIOC_REQBUFS: libc::c_ulong = ((3 as libc::c_ulong) << 30)
+            | ((b'V' as libc::c_ulong) << 8)
+            | (8 as libc::c_ulong)
+            | ((mem::size_of::<v4l::v4l2_requestbuffers>() as libc::c_ulong) << 16);
+        assert_eq!(codes::VIDIOC_REQBUFS, VIDIOC_REQBUFS);
+
+        let VIDIOC_QUERYBUF: libc::c_ulong = ((3 as libc::c_ulong) << 30)
+            | ((b'V' as libc::c_ulong) << 8)
+            | (9 as libc::c_ulong)
+            | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_ulong) << 16);
+        assert_eq!(codes::VIDIOC_QUERYBUF, VIDIOC_QUERYBUF);
+
+        let VIDIOC_QBUF: libc::c_ulong = ((3 as libc::c_ulong) << 30)
+            | ((b'V' as libc::c_ulong) << 8)
+            | (15 as libc::c_ulong)
+            | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_ulong) << 16);
+        assert_eq!(codes::VIDIOC_QBUF, VIDIOC_QBUF);
+
+        let VIDIOC_STREAMON: libc::c_ulong = ((1 as libc::c_ulong) << 30)
+            | ((b'V' as libc::c_ulong) << 8)
+            | (18 as libc::c_ulong)
+            | ((mem::size_of::<libc::c_int>() as libc::c_ulong) << 16);
+        assert_eq!(codes::VIDIOC_STREAMON, VIDIOC_STREAMON);
+
+        let VIDIOC_DQBUF: libc::c_ulong = ((3 as libc::c_ulong) << 30)
+            | ((b'V' as libc::c_ulong) << 8)
+            | (17 as libc::c_ulong)
+            | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_ulong) << 16);
+        assert_eq!(codes::VIDIOC_DQBUF, VIDIOC_DQBUF);
+
+        let VIDIOC_QBUF: libc::c_ulong = ((3 as libc::c_ulong) << 30)
+            | ((b'V' as libc::c_ulong) << 8)
+            | (15 as libc::c_ulong)
+            | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_ulong) << 16);
+        assert_eq!(codes::VIDIOC_QBUF, VIDIOC_QBUF);
+
+        let VIDIOC_STREAMOFF: libc::c_ulong = ((1 as libc::c_ulong) << 30)
+            | ((b'V' as libc::c_ulong) << 8)
+            | (19 as libc::c_ulong)
+            | ((mem::size_of::<libc::c_int>() as libc::c_ulong) << 16);
+        assert_eq!(codes::VIDIOC_STREAMOFF, VIDIOC_STREAMOFF);
+    }
+}
