@@ -26,7 +26,15 @@ macro_rules! ioc {
     };
 }
 
-/// IOR
+/// _IO
+#[macro_export]
+macro_rules! io {
+    ($ty:expr, $nr:expr) => {
+        ioc!($crate::ioctl::NONE, $ty, $nr, 0)
+    };
+}
+
+/// _IOR
 #[macro_export]
 macro_rules! ior {
     ($ty:expr, $nr:expr, $sz:ty) => {
@@ -34,7 +42,7 @@ macro_rules! ior {
     };
 }
 
-/// IOW
+/// _IOW
 #[macro_export]
 macro_rules! iow {
     ($ty:expr, $nr:expr, $sz:ty) => {
@@ -42,7 +50,7 @@ macro_rules! iow {
     };
 }
 
-/// IOWR
+/// _IOWR
 #[macro_export]
 macro_rules! iowr {
     ($ty:expr, $nr:expr, $sz:ty) => {
