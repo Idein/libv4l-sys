@@ -3,7 +3,10 @@
 #![allow(non_snake_case)]
 
 #[macro_use]
-pub mod ioctl;
-pub mod videodev2;
+mod ioctl;
+mod videodev2;
+
+pub use ioctl::*;
+pub use videodev2::*;
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
