@@ -77,15 +77,12 @@ fn main() {
         fd
     };
 
-    let V4L2_PIX_FMT_RGB24: u32 =
-        ((b'R' as u32) << 0) | ((b'G' as u32) << 8) | ((b'B' as u32) << 16) | ((b'3' as u32) << 24);
-
     let mut fmt = unsafe {
         let mut fmt: v4l::v4l2_format = mem::zeroed();
         fmt.type_ = v4l::v4l2_buf_type_V4L2_BUF_TYPE_VIDEO_CAPTURE;
         fmt.fmt.pix.width = 320;
         fmt.fmt.pix.height = 240;
-        fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB24;
+        fmt.fmt.pix.pixelformat = v4l::pixel_format::V4L2_PIX_FMT_RGB24;
         fmt.fmt.pix.field = v4l::v4l2_field_V4L2_FIELD_INTERLACED;
         fmt
     };
@@ -95,7 +92,7 @@ fn main() {
         v4l::codes::VIDIOC_S_FMT,
         &mut fmt as *mut _ as *mut libc::c_void,
     );
-    if unsafe { fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_RGB24 } {
+    if unsafe { fmt.fmt.pix.pixelformat != v4l::pixel_format::V4L2_PIX_FMT_RGB24 } {
         println!("Libv4l didn't accept RGB24 format. Can't proceed.");
         panic!()
     }
