@@ -90,43 +90,11 @@ fn main() {
         fmt
     };
 
-    /*
-    VIDIOC_S_FMT
-    ==> _IOWR('V', 5, struct v4l2_format)
-    ==> _IOC(_IOC_READ|_IOC_WRITE, ('V'), (5), (_IOC_TYPECHECK(struct v4l2_format)))
-    ==> _IOC(       2U|_IOC_WRITE, ('V'), (5), (_IOC_TYPECHECK(struct v4l2_format)))
-    ==> _IOC(       2U|        1U, ('V'), (5), (_IOC_TYPECHECK(struct v4l2_format)))
-    ==> _IOC(       2U|        1U, ('V'), (5), (sizeof(struct v4l2_format)))
-    ==> (((3U)  << _IOC_DIRSHIFT)  |
-         (('V') << _IOC_TYPESHIFT) |
-         ((5)   << _IOC_NRSHIFT)   |
-         ((sizeof(v4l2_format)) << _IOC_SIZESHIFT))
-    ==> (((3U)  << (_IOC_SIZESHIFT + _IOC_SIZEBITS))  |
-         (('V') << (_IOC_NRSHIFT + _IOC_NRBITS)) |
-         ((5)   << 0)   |
-         ((sizeof(v4l2_format)) << (_IOC_TYPESHIFT + _IOC_TYPEBITS)))
-    ==> (((3U)  << ((_IOC_TYPESHIFT  _IOC_TYPEBITS) + 14))  |
-         (('V') << (0 + 8)) |
-         ((5)   << 0)   |
-         ((sizeof(v4l2_format)) << ((_IOC_NRSHIFT + _IOC_NRBITS) + 8)))
-    ==> (((3U)  << (((_IOC_NRSHIFT + _IOC_NRBITS) + 8) + 14))  |
-         (('V') << 8) |
-         ((5)   << 0) |
-         ((sizeof(v4l2_format)) << ((0 + 8) + 8)))
-    ==> (((3U)  << (((0 + 8) + 8) + 14))  |
-         (('V') << 8) |
-         ((5)   << 0) |
-         ((sizeof(v4l2_format)) << ((0 + 8) + 8)))
-    ==> ((3U  << 30)  |
-         ('V' << 8) |
-         5 |
-         (sizeof(v4l2_format) << 16))
-    */
-    let VIDIOC_S_FMT: libc::c_ulong = ((3 as libc::c_ulong) << 30)
-        | ((b'V' as libc::c_ulong) << 8)
-        | (5 as libc::c_ulong)
-        | ((mem::size_of::<v4l::v4l2_format>() as libc::c_ulong) << 16);
-    xioctl(fd, VIDIOC_S_FMT, &mut fmt as *mut _ as *mut libc::c_void);
+    xioctl(
+        fd,
+        v4l::codes::VIDIOC_S_FMT,
+        &mut fmt as *mut _ as *mut libc::c_void,
+    );
     if unsafe { fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_RGB24 } {
         println!("Libv4l didn't accept RGB24 format. Can't proceed.");
         panic!()
@@ -147,26 +115,11 @@ fn main() {
         req
     };
 
-    /*
-    VIDIOC_REQBUFS
-    ==> _IOWR('V', 8, struct v4l2_requestbuffers)
-    ==> _IOC(       2U|        1U, ('V'), (8), (sizeof(struct v4l2_requestbuffers)))
-    ...
-    ==> (((3U)  << _IOC_DIRSHIFT)  |
-         (('V') << _IOC_TYPESHIFT) |
-         ((5)   << _IOC_NRSHIFT)   |
-         ((sizeof(v4l2_requestbuffers)) << _IOC_SIZESHIFT))
-    ...
-    ==> (((3U)  << (((0 + 8) + 8) + 14))  |
-         (('V') << 8) |
-         ((5)   << 0) |
-         ((sizeof(v4l2_requestbuffers)) << ((0 + 8) + 8)))
-    */
-    let VIDIOC_REQBUFS: libc::c_ulong = ((3 as libc::c_ulong) << 30)
-        | ((b'V' as libc::c_ulong) << 8)
-        | (8 as libc::c_ulong)
-        | ((mem::size_of::<v4l::v4l2_requestbuffers>() as libc::c_ulong) << 16);
-    xioctl(fd, VIDIOC_REQBUFS, &mut req as *mut _ as *mut libc::c_void);
+    xioctl(
+        fd,
+        v4l::codes::VIDIOC_REQBUFS,
+        &mut req as *mut _ as *mut libc::c_void,
+    );
 
     let mut buffers = Vec::new();
     for n_buffers in 0..req.count {
@@ -177,26 +130,12 @@ fn main() {
             buf.index = n_buffers;
             buf
         };
-        /*
-        VIDIOC_QUERYBUF
-        ==> _IOWR('V', 9, struct v4l2_buffer)
-        ==> _IOC(       2U|        1U, ('V'), (9), (sizeof(struct v4l2_buffer)))
-        ...
-        ==> (((3U)  << _IOC_DIRSHIFT)  |
-             (('V') << _IOC_TYPESHIFT) |
-             ((9)   << _IOC_NRSHIFT)   |
-             ((sizeof(v4l2_buffer)) << _IOC_SIZESHIFT))
-        ...
-        ==> (((3U)  << (((0 + 8) + 8) + 14))  |
-             (('V') << 8) |
-             ((9)   << 0) |
-             ((sizeof(v4l2_buffer)) << ((0 + 8) + 8)))
-        */
-        let VIDIOC_QUERYBUF: libc::c_ulong = ((3 as libc::c_ulong) << 30)
-            | ((b'V' as libc::c_ulong) << 8)
-            | (9 as libc::c_ulong)
-            | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_ulong) << 16);
-        xioctl(fd, VIDIOC_QUERYBUF, &mut buf as *mut _ as *mut libc::c_void);
+
+        xioctl(
+            fd,
+            v4l::codes::VIDIOC_QUERYBUF,
+            &mut buf as *mut _ as *mut libc::c_void,
+        );
         let buffer = unsafe {
             buffer {
                 start: v4l::v4l2_mmap(
@@ -227,31 +166,17 @@ fn main() {
             buf
         };
 
-        let VIDIOC_QBUF: libc::c_ulong = ((3 as libc::c_ulong) << 30)
-            | ((b'V' as libc::c_ulong) << 8)
-            | (15 as libc::c_ulong)
-            | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_ulong) << 16);
-        xioctl(fd, VIDIOC_QBUF, &mut buf as *mut _ as *mut libc::c_void);
+        xioctl(
+            fd,
+            v4l::codes::VIDIOC_QBUF,
+            &mut buf as *mut _ as *mut libc::c_void,
+        );
     }
 
     let mut type_ = v4l::v4l2_buf_type_V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    /*
-    VIDIOC_STREAMON
-    ==> _IOW('V', 18, int)
-    ==> _IOC(_IOC_WRITE, ('V'), (5), (_IOC_TYPECHECK(int)))
-    ...
-    ==> ((1U  << 30)  |
-         ('V' << 8) |
-         18 |
-         (sizeof(int) << 16))
-    */
-    let VIDIOC_STREAMON: libc::c_ulong = ((1 as libc::c_ulong) << 30)
-        | ((b'V' as libc::c_ulong) << 8)
-        | (18 as libc::c_ulong)
-        | ((mem::size_of::<libc::c_int>() as libc::c_ulong) << 16);
     xioctl(
         fd,
-        VIDIOC_STREAMON,
+        v4l::codes::VIDIOC_STREAMON,
         &mut type_ as *mut _ as *mut libc::c_void,
     );
 
@@ -288,12 +213,12 @@ fn main() {
             buf
         };
 
-        let VIDIOC_DQBUF: libc::c_ulong = ((3 as libc::c_ulong) << 30)
-            | ((b'V' as libc::c_ulong) << 8)
-            | (17 as libc::c_ulong)
-            | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_ulong) << 16);
         debug!("VIDIOC_DQBUF");
-        xioctl(fd, VIDIOC_DQBUF, &mut buf as *mut _ as *mut libc::c_void);
+        xioctl(
+            fd,
+            v4l::codes::VIDIOC_DQBUF,
+            &mut buf as *mut _ as *mut libc::c_void,
+        );
 
         {
             let mut fout = fs::File::create(&format!("out{:03}.ppm", i)).unwrap();
@@ -313,33 +238,19 @@ fn main() {
             }
         }
 
-        let VIDIOC_QBUF: libc::c_ulong = ((3 as libc::c_ulong) << 30)
-            | ((b'V' as libc::c_ulong) << 8)
-            | (15 as libc::c_ulong)
-            | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_ulong) << 16);
         debug!("VIDIOC_QBUF");
-        xioctl(fd, VIDIOC_QBUF, &mut buf as *mut _ as *mut libc::c_void);
+        xioctl(
+            fd,
+            v4l::codes::VIDIOC_QBUF,
+            &mut buf as *mut _ as *mut libc::c_void,
+        );
     }
 
     let mut type_ = v4l::v4l2_buf_type_V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    /*
-    VIDIOC_STREAMON
-    ==> _IOW('V', 19, int)
-    ==> _IOC(_IOC_WRITE, ('V'), (5), (_IOC_TYPECHECK(int)))
-    ...
-    ==> ((1U  << 30)  |
-         ('V' << 8) |
-         19 |
-         (sizeof(int) << 16))
-    */
-    let VIDIOC_STREAMOFF: libc::c_ulong = ((1 as libc::c_ulong) << 30)
-        | ((b'V' as libc::c_ulong) << 8)
-        | (19 as libc::c_ulong)
-        | ((mem::size_of::<libc::c_int>() as libc::c_ulong) << 16);
     debug!("VIDIOC_STREAMOFF");
     xioctl(
         fd,
-        VIDIOC_STREAMOFF,
+        v4l::codes::VIDIOC_STREAMOFF,
         &mut type_ as *mut _ as *mut libc::c_void,
     );
 
