@@ -1,10 +1,8 @@
 mod ioc {
-    use libc;
-
-    pub const NRBITS: u8 = 8;
-    pub const TYPEBITS: u8 = 8;
-    pub const SIZEBITS: u8 = 14;
-    pub const DIRBITS: u8 = 2;
+    pub const NRBITS: libc::c_ulong = 8;
+    pub const TYPEBITS: libc::c_ulong = 8;
+    pub const SIZEBITS: libc::c_ulong = 14;
+    pub const DIRBITS: libc::c_ulong = 2;
 
     pub const NRSHIFT: libc::c_ulong = 0;
     pub const TYPESHIFT: libc::c_ulong = NRSHIFT + NRBITS;
@@ -20,7 +18,7 @@ pub use self::ioc::*;
 
 /// _IOC
 macro_rules! ioc {
-    ($dir:expr, $ty:expr, $nr:expr, $sz:$expr) => {
+    ($dir:expr, $ty:expr, $nr:expr, $sz:expr) => {
         ($dir << DIRSHIFT) | ($ty << TYPESHIFT) | ($nr << NRSHIFT) | ($sz << SIZESHIFT)
     };
 }
