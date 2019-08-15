@@ -41,7 +41,7 @@ fn strerror() -> String {
         .into()
 }
 
-fn rioctl(fd: libc::c_int, request: libc::c_uint, arg: *mut libc::c_void) -> libc::c_int {
+fn rioctl(fd: libc::c_int, request: libc::c_ulong, arg: *mut libc::c_void) -> libc::c_int {
     let mut r;
 
     loop {
@@ -55,7 +55,7 @@ fn rioctl(fd: libc::c_int, request: libc::c_uint, arg: *mut libc::c_void) -> lib
     r
 }
 
-fn xioctl(fd: libc::c_int, request: libc::c_uint, arg: *mut libc::c_void) {
+fn xioctl(fd: libc::c_int, request: libc::c_ulong, arg: *mut libc::c_void) {
     if rioctl(fd, request, arg) == -1 {
         error!("error {}, {}", errno!(), strerror());
         panic!()
@@ -122,11 +122,10 @@ fn main() {
          5 |
          (sizeof(v4l2_format) << 16))
     */
-    let VIDIOC_S_FMT: libc::c_uint = ((3 as libc::c_uint) << 30)
-        | ((b'V' as libc::c_uint) << 8)
-        | (5 as libc::c_uint)
-        | ((mem::size_of::<v4l::v4l2_format>() as libc::c_uint) << 16);
-
+    let VIDIOC_S_FMT: libc::c_ulong = ((3 as libc::c_ulong) << 30)
+        | ((b'V' as libc::c_ulong) << 8)
+        | (5 as libc::c_ulong)
+        | ((mem::size_of::<v4l::v4l2_format>() as libc::c_ulong) << 16);
     xioctl(fd, VIDIOC_S_FMT, &mut fmt as *mut _ as *mut libc::c_void);
     if unsafe { fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_RGB24 } {
         println!("Libv4l didn't accept RGB24 format. Can't proceed.");
@@ -163,10 +162,10 @@ fn main() {
          ((5)   << 0) |
          ((sizeof(v4l2_requestbuffers)) << ((0 + 8) + 8)))
     */
-    let VIDIOC_REQBUFS: libc::c_uint = ((3 as libc::c_uint) << 30)
-        | ((b'V' as libc::c_uint) << 8)
-        | (8 as libc::c_uint)
-        | ((mem::size_of::<v4l::v4l2_requestbuffers>() as libc::c_uint) << 16);
+    let VIDIOC_REQBUFS: libc::c_ulong = ((3 as libc::c_ulong) << 30)
+        | ((b'V' as libc::c_ulong) << 8)
+        | (8 as libc::c_ulong)
+        | ((mem::size_of::<v4l::v4l2_requestbuffers>() as libc::c_ulong) << 16);
     xioctl(fd, VIDIOC_REQBUFS, &mut req as *mut _ as *mut libc::c_void);
 
     let mut buffers = Vec::new();
@@ -193,10 +192,10 @@ fn main() {
              ((9)   << 0) |
              ((sizeof(v4l2_buffer)) << ((0 + 8) + 8)))
         */
-        let VIDIOC_QUERYBUF: libc::c_uint = ((3 as libc::c_uint) << 30)
-            | ((b'V' as libc::c_uint) << 8)
-            | (9 as libc::c_uint)
-            | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_uint) << 16);
+        let VIDIOC_QUERYBUF: libc::c_ulong = ((3 as libc::c_ulong) << 30)
+            | ((b'V' as libc::c_ulong) << 8)
+            | (9 as libc::c_ulong)
+            | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_ulong) << 16);
         xioctl(fd, VIDIOC_QUERYBUF, &mut buf as *mut _ as *mut libc::c_void);
         let buffer = unsafe {
             buffer {
@@ -228,10 +227,10 @@ fn main() {
             buf
         };
 
-        let VIDIOC_QBUF: libc::c_uint = ((3 as libc::c_uint) << 30)
-            | ((b'V' as libc::c_uint) << 8)
-            | (15 as libc::c_uint)
-            | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_uint) << 16);
+        let VIDIOC_QBUF: libc::c_ulong = ((3 as libc::c_ulong) << 30)
+            | ((b'V' as libc::c_ulong) << 8)
+            | (15 as libc::c_ulong)
+            | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_ulong) << 16);
         xioctl(fd, VIDIOC_QBUF, &mut buf as *mut _ as *mut libc::c_void);
     }
 
@@ -246,10 +245,10 @@ fn main() {
          18 |
          (sizeof(int) << 16))
     */
-    let VIDIOC_STREAMON: libc::c_uint = ((1 as libc::c_uint) << 30)
-        | ((b'V' as libc::c_uint) << 8)
-        | (18 as libc::c_uint)
-        | ((mem::size_of::<libc::c_int>() as libc::c_uint) << 16);
+    let VIDIOC_STREAMON: libc::c_ulong = ((1 as libc::c_ulong) << 30)
+        | ((b'V' as libc::c_ulong) << 8)
+        | (18 as libc::c_ulong)
+        | ((mem::size_of::<libc::c_int>() as libc::c_ulong) << 16);
     xioctl(
         fd,
         VIDIOC_STREAMON,
@@ -289,10 +288,10 @@ fn main() {
             buf
         };
 
-        let VIDIOC_DQBUF: libc::c_uint = ((3 as libc::c_uint) << 30)
-            | ((b'V' as libc::c_uint) << 8)
-            | (17 as libc::c_uint)
-            | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_uint) << 16);
+        let VIDIOC_DQBUF: libc::c_ulong = ((3 as libc::c_ulong) << 30)
+            | ((b'V' as libc::c_ulong) << 8)
+            | (17 as libc::c_ulong)
+            | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_ulong) << 16);
         debug!("VIDIOC_DQBUF");
         xioctl(fd, VIDIOC_DQBUF, &mut buf as *mut _ as *mut libc::c_void);
 
@@ -314,10 +313,10 @@ fn main() {
             }
         }
 
-        let VIDIOC_QBUF: libc::c_uint = ((3 as libc::c_uint) << 30)
-            | ((b'V' as libc::c_uint) << 8)
-            | (15 as libc::c_uint)
-            | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_uint) << 16);
+        let VIDIOC_QBUF: libc::c_ulong = ((3 as libc::c_ulong) << 30)
+            | ((b'V' as libc::c_ulong) << 8)
+            | (15 as libc::c_ulong)
+            | ((mem::size_of::<v4l::v4l2_buffer>() as libc::c_ulong) << 16);
         debug!("VIDIOC_QBUF");
         xioctl(fd, VIDIOC_QBUF, &mut buf as *mut _ as *mut libc::c_void);
     }
@@ -333,10 +332,10 @@ fn main() {
          19 |
          (sizeof(int) << 16))
     */
-    let VIDIOC_STREAMOFF: libc::c_uint = ((1 as libc::c_uint) << 30)
-        | ((b'V' as libc::c_uint) << 8)
-        | (19 as libc::c_uint)
-        | ((mem::size_of::<libc::c_int>() as libc::c_uint) << 16);
+    let VIDIOC_STREAMOFF: libc::c_ulong = ((1 as libc::c_ulong) << 30)
+        | ((b'V' as libc::c_ulong) << 8)
+        | (19 as libc::c_ulong)
+        | ((mem::size_of::<libc::c_int>() as libc::c_ulong) << 16);
     debug!("VIDIOC_STREAMOFF");
     xioctl(
         fd,
