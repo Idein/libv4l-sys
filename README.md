@@ -13,5 +13,5 @@ LIBCLANG_INCLUDE_PATH=/usr/include/clang/7/include cargo build
 
 ### Required package
 
-- llvm-dev
+- libclang-7-dev
 - libv4l-dev
