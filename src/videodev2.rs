@@ -1,3 +1,5 @@
+///! import linux/videodev2.h
+
 /// ioctl codes for video devices
 pub mod codes {
     const VIDEODEV2_IOC_MAGIC: u8 = b'V';
@@ -89,7 +91,7 @@ pub mod codes {
         iowr!(VIDEODEV2_IOC_MAGIC, 78, crate::v4l2_encoder_cmd);
 }
 
-/// Four-character-code (FOURCC)
+/// Construct four-character-code (FOURCC)
 #[macro_export]
 macro_rules! fourcc {
     ($a:expr, $b:expr, $c:expr, $d:expr) => {
