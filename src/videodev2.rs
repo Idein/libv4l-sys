@@ -517,7 +517,18 @@ mod test {
     use crate as v4l;
     use std::mem;
 
-    fn cmp_with_naive() {
+    #[test]
+    fn make_fourcc() {
+        let V4L2_PIX_FMT_RGB24: u32 = ((b'R' as u32) << 0)
+            | ((b'G' as u32) << 8)
+            | ((b'B' as u32) << 16)
+            | ((b'3' as u32) << 24);
+
+        assert_eq!(pixel_format::V4L2_PIX_FMT_RGB24, V4L2_PIX_FMT_RGB24);
+    }
+
+    #[test]
+    fn ioctl_code() {
         let VIDIOC_S_FMT: libc::c_ulong = ((3 as libc::c_ulong) << 30)
             | ((b'V' as libc::c_ulong) << 8)
             | (5 as libc::c_ulong)
