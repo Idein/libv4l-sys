@@ -1,23 +1,32 @@
 ///! import linux/videodev2.h
 
 /// ioctl codes for video devices
+/// ref. https://www.linuxtv.org/downloads/v4l-dvb-apis-new/uapi/v4l/user-func.html
 pub mod codes {
     const VIDEODEV2_IOC_MAGIC: u8 = b'V';
 
     pub const VIDIOC_QUERYCAP: libc::c_ulong = ior!(VIDEODEV2_IOC_MAGIC, 0, crate::v4l2_capability);
     pub const VIDIOC_RESERVED: libc::c_ulong = io!(VIDEODEV2_IOC_MAGIC, 1);
     pub const VIDIOC_ENUM_FMT: libc::c_ulong = iowr!(VIDEODEV2_IOC_MAGIC, 2, crate::v4l2_fmtdesc);
+    /// These ioctls are used to negotiate the format of data (typically image format) exchanged between driver and application.
     pub const VIDIOC_G_FMT: libc::c_ulong = iowr!(VIDEODEV2_IOC_MAGIC, 4, crate::v4l2_format);
+    /// These ioctls are used to negotiate the format of data (typically image format) exchanged between driver and application.
     pub const VIDIOC_S_FMT: libc::c_ulong = iowr!(VIDEODEV2_IOC_MAGIC, 5, crate::v4l2_format);
+    /// allocates the desired number of buffers, this is a required step in the initialization sequence.
     pub const VIDIOC_REQBUFS: libc::c_ulong =
         iowr!(VIDEODEV2_IOC_MAGIC, 8, crate::v4l2_requestbuffers);
+    /// Buffers are individually mapped. The offset and size of each buffer can be determined with the ioctl VIDIOC_QUERYBUF ioctl.
     pub const VIDIOC_QUERYBUF: libc::c_ulong = iowr!(VIDEODEV2_IOC_MAGIC, 9, crate::v4l2_buffer);
     pub const VIDIOC_G_FBUF: libc::c_ulong = ior!(VIDEODEV2_IOC_MAGIC, 10, crate::v4l2_framebuffer);
     pub const VIDIOC_S_FBUF: libc::c_ulong = iow!(VIDEODEV2_IOC_MAGIC, 11, crate::v4l2_framebuffer);
     pub const VIDIOC_OVERLAY: libc::c_ulong = iow!(VIDEODEV2_IOC_MAGIC, 14, ::std::os::raw::c_int);
+    /// Applications call the VIDIOC_QBUF ioctl to enqueue an empty (capturing) or filled (output) buffer in the driver’s incoming queue.
+    /// The semantics depend on the selected I/O method.
     pub const VIDIOC_QBUF: libc::c_ulong = iowr!(VIDEODEV2_IOC_MAGIC, 15, crate::v4l2_buffer);
     pub const VIDIOC_EXPBUF: libc::c_ulong =
         iowr!(VIDEODEV2_IOC_MAGIC, 16, crate::v4l2_exportbuffer);
+    /// Applications call the VIDIOC_QBUF ioctl to enqueue an empty (capturing) or filled (output) buffer in the driver’s incoming queue.
+    /// The semantics depend on the selected I/O method.
     pub const VIDIOC_DQBUF: libc::c_ulong = iowr!(VIDEODEV2_IOC_MAGIC, 17, crate::v4l2_buffer);
     pub const VIDIOC_STREAMON: libc::c_ulong = iow!(VIDEODEV2_IOC_MAGIC, 18, ::std::os::raw::c_int);
     pub const VIDIOC_STREAMOFF: libc::c_ulong =
