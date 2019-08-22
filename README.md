@@ -11,6 +11,18 @@ Rust FFI wrapper to libv4l.
 LIBCLANG_INCLUDE_PATH=/usr/include/clang/7/include cargo build
 ```
 
+### Cross build
+
+```sh
+libv4l-sys$ cat <<EOF > .cargo/config
+[target.arm-unknown-linux-gnueabihf]
+linker = "arm-rpi-linux-gnueabihf-gcc"
+rustflags = ["-C", "link-args=-Wl,-rpath-link,/usr/lib/arm-linux-gnueabihf"]
+EOF
+libv4l-sys$ export LIBCLANG_INCLUDE_PATH=/usr/include/clang/7/include
+libv4l-sys$ cargo build --target=arm-unknown-linux-gnueabihf
+```
+
 ### Required package
 
 - libclang-7-dev
