@@ -29,9 +29,10 @@ impl<'a> PkgConfig<'a> {
 fn main() {
     let prefix: PathBuf = envvar("PKG_CONFIG_PREFIX").unwrap_or_else(|_| {
         println!("cargo:warning=\"/usr\" is used by default.");
-        "/usr/".into()
+        "/usr".into()
     });
     let libv4l = PkgConfig::new(&prefix).probe_library("libv4l2");
+    println!("cargo:warning=libv4l {:?}", libv4l);
 
     // Path to directories of C header
     let include_dirs: Vec<PathBuf> = vec![envvar("LIBCLANG_INCLUDE_PATH").unwrap_or_else(|_| {
@@ -44,6 +45,7 @@ fn main() {
         .chain(libv4l.include_paths.iter())
         .flat_map(|path| vec!["-I", path.to_str().unwrap()])
         .collect();
+    println!("cargo:warning=include={:?}", include_args);
 
     let bindings = bindgen::Builder::default()
         .header("wrapper.h")
