@@ -1,0 +1,11 @@
+
+[target.arm-unknown-linux-gnueabihf]
+linker = "armv6-rpi-linux-gnueabihf-gcc"
+rustflags = [
+  "-C", "link-args=-Wl,-rpath-link,/usr/lib/raspbian",
+  "-C", "link-args=-Wl,--unresolved-symbols=ignore-all -Wl,--no-as-needed",
+  "-C", "link-arg=-march=armv6",
+  "-C", "link-arg=-mcpu=arm1176jzf-s",
+  "-C", "link-arg=-mfpu=vfp",
+  "-C", "link-arg=-mfloat-abi=hard"
+]
