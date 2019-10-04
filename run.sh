@@ -4,7 +4,8 @@ set -ex
 
 export TARGET_ARCH='arm-unknown-linux-gnueabihf'
 export LIBCLANG_INCLUDE_PATH='/usr/include/clang/3.9.1/include'
-export PKG_CONFIG_PATH='/usr/lib/arm-linux-gnueabihf/pkgconfig'
+export PKG_CONFIG_PATH='/raspbian/usr/lib/arm-linux-gnueabihf/pkgconfig'
+export PKG_CONFIG_PREFIX='/raspbian/usr'
 
 sudo apt update -y
 sudo apt install -y gnupg apt-transport-https
@@ -26,9 +27,9 @@ pushd ${tempdir}
   for pkg in ${PKGLIST}; do apt download ${pkg}; done
   
   # expand deb
-  for pkg in *.deb; do sudo dpkg -x ${pkg} /; done
+  for pkg in *.deb; do sudo dpkg -x ${pkg} /raspbian; done
 popd
 
-cargo build --target=${TARGET_ARCH}
-
+cargo -v build --target=${TARGET_ARCH} \
+&& cargo -v build --target=${TARGET_ARCH} --example v4l2grab
 
