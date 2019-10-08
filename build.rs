@@ -1,70 +1,32 @@
 extern crate bindgen;
 
 use std::env;
-use std::path::{Path, PathBuf};
-
-use pkg_config::Library;
-
-#[derive(Debug)]
-struct PkgConfig<'a> {
-    pub prefix: &'a Path,
-}
-
-impl<'a> PkgConfig<'a> {
-    fn new(prefix: &'a Path) -> Self {
-        PkgConfig { prefix }
-    }
-
-    fn probe_library(&self, name: &str) -> Library {
-        pkg_config::Config::new()
-            .arg(format!(
-                "--define-variable=prefix={}",
-                self.prefix.display()
-            ))
-            .probe(name)
-            .expect(&format!("pkg-config {}", name))
-    }
-}
+use std::path::PathBuf;
 
 fn main() {
-    let prefix: PathBuf = envvar("PKG_CONFIG_PREFIX").unwrap_or_else(|_| {
-        println!("cargo:warning=\"/usr\" is used by default for PKG_CONFIG_PREFIX.");
-        "/usr".into()
-    });
-    let libv4l2 = PkgConfig::new(&prefix).probe_library("libv4l2");
-    println!("cargo:warning=libv4l2 {:?}", libv4l2);
+    let libv4l = pkg_config::probe_library("libv4l2").unwrap();
 
     // Path to directories of C header
-    let include_dirs: Vec<PathBuf> = vec![envvar("LIBCLANG_INCLUDE_PATH").unwrap_or_else(|_| {
-        println!("cargo:warning=e.g. LIBCLANG_INCLUDE_PATH=/usr/include/clang/9.0.0/include");
-        panic!();
-    })];
+    let include_dirs: Vec<PathBuf> = vec![PathBuf::from(
+        &env::var("LIBCLANG_INCLUDE_PATH")
+            .expect("LIBCLANG_INCLUDE_PATH like: /usr/include/clang/9.0.0/include"),
+    )];
+    println!("cargo:warnings=libv4l={:?}", libv4l);
 
     let include_args: Vec<_> = include_dirs
         .iter()
-        .chain(libv4l2.include_paths.iter())
+        .chain(libv4l.include_paths.iter())
         .flat_map(|path| vec!["-I", path.to_str().unwrap()])
         .collect();
-    println!("cargo:warning=include={:?}", include_args);
+    println!("cargo:warnings=include_args={:?}", include_args);
 
     let bindings = bindgen::Builder::default()
         .header("wrapper.h")
         .clang_args(&include_args)
         .generate()
         .expect("Unable to generate bindings");
-    let out_path = envvar::<PathBuf>("OUT_DIR").unwrap();
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
-}
-
-/// Read the envvar and convert it to type `T` value.
-fn envvar<T>(var: &str) -> Result<T, std::env::VarError>
-where
-    T: From<String>,
-{
-    env::var(var).map(Into::into).map_err(|err| {
-        println!("cargo:warning=read envvar error: {}: {}", err, var);
-        err
-    })
 }
