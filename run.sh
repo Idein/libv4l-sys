@@ -45,9 +45,9 @@ pushd ${tempdir}
   rm *.deb
 popd
 
-sudo ln -s /raspbian/usr/include/arm-linux-gnueabihf /usr/include/
-#sudo ln -s /raspbian/lib/arm-linux-gnueabihf         /lib/
-#sudo ln -s /raspbian/usr/lib/arm-linux-gnueabihf     /usr/lib/
+#sudo ln -s /raspbian/usr/include/arm-linux-gnueabihf /usr/include/
+sudo ln -s /raspbian/lib/arm-linux-gnueabihf         /lib/
+sudo ln -s /raspbian/usr/lib/arm-linux-gnueabihf     /usr/lib/
 
 cargo -v build --target=${TARGET_ARCH} \
 && cargo -v build --target=${TARGET_ARCH} --example v4l2grab
