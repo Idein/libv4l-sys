@@ -8,6 +8,12 @@ Rust FFI wrapper to libv4l.
 ## Build
 
 ```sh
+cargo build
+```
+
+You can specify the path to the system header directory using `LIBCLANG_INCLUDE_PATH`.
+
+```sh
 LIBCLANG_INCLUDE_PATH=/usr/include/clang/7/include cargo build
 ```
 
