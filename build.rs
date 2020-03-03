@@ -16,6 +16,7 @@ fn main() {
         .chain(libv4l.include_paths.iter())
         .flat_map(|path| vec!["-I", path.to_str().unwrap()])
         .collect();
+    println!("cargo:warning={:?}", include_args);
 
     let target_args = vec!["-target".into(), env::var("TARGET").unwrap()];
     println!("cargo:warning={:?}", target_args);
