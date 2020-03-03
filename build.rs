@@ -17,11 +17,8 @@ fn main() {
         .flat_map(|path| vec!["-I", path.to_str().unwrap()])
         .collect();
 
-    let target_args = if let Some(target) = env::var("TARGET_ARCH").ok() {
-        vec!["-target".into(), target]
-    } else {
-        vec![]
-    };
+    let target_args = vec!["-target".into(), env::var("TARGET").unwrap()];
+    println!("cargo:warning={:?}", target_args);
 
     let bindings = bindgen::Builder::default()
         .header("wrapper.h")
