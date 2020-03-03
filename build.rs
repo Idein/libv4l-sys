@@ -27,6 +27,7 @@ fn main() {
         .header("wrapper.h")
         .clang_args(&target_args)
         .clang_args(&include_args)
+        .derive_debug(false)
         .generate()
         .expect("Unable to generate bindings");
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
