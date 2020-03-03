@@ -21,12 +21,6 @@ You can specify some build parameters.
     LIBCLANG_INCLUDE_PATH=/usr/include/clang/7/include cargo build
     ```
 
-- `TARGET_ARCH`: Target architecture
-
-    ```sh
-    TARGET_ARCH=arm-unknown-linux-gnueabihf cargo build
-    ```
-
 ### Cross build
 
 For cross compiling, some more configurations are required.
@@ -40,8 +34,7 @@ linker = "arm-rpi-linux-gnueabihf-gcc"
 rustflags = ["-C", "link-args=-Wl,-rpath-link,/usr/lib/arm-linux-gnueabihf"]
 EOF
 libv4l-sys$ export LIBCLANG_INCLUDE_PATH=/usr/include/clang/7/include
-libv4l-sys$ export TARGET_ARCH=arm-unknown-linux-gnueabihf
-libv4l-sys$ cargo build --target=${TARGET_ARCH}
+libv4l-sys$ cargo build --target=arm-unknown-linux-gnueabihf
 ```
 
 ### Required package
