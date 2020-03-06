@@ -1,6 +1,15 @@
-version: 2
+version: 2.1
+
+constants:
+  parameter-rust-version: &parameter-rust-version
+    rust:
+      type: string
+      default: "1.36.0"
+
 jobs:
   build:
+    parameters:
+      <<: *parameter-rust-version
     working_directory: /tmp/libv4l_sys
     docker:
       - image: rust:1.36.0-buster
@@ -14,12 +23,18 @@ jobs:
           command: |
             apt-get update -y
             apt-get install -y libclang-7-dev libv4l-dev
+      - run:
+          name: Setup Rust
+          command: |
+            rustup default << parameters.rust >>
       - run:
           name: Build crate
           command: |
             cargo build
 
   test:
+    parameters:
+      <<: *parameter-rust-version
     working_directory: /tmp/libv4l_sys
     docker:
       - image: rust:1.36.0-buster
@@ -34,11 +49,17 @@ jobs:
             apt-get update -y
             apt-get install -y libclang-7-dev libv4l-dev
       - run:
+          name: Setup Rust
+          command: |
+            rustup default << parameters.rust >>
+      - run:
           name: Cargo test
           command: |
             cargo test
 
   cross_build:
+    parameters:
+      <<: *parameter-rust-version
     working_directory: /tmp/libv4l_sys
     docker:
       - image: rust:1.36.0-buster
@@ -60,6 +81,7 @@ jobs:
       - run:
           name: Install Rust for ARM
           command: |
+            rustup default << parameters.rust >>
             rustup target add ${TARGET_ARCH}
       - run:
           name: Build crate
@@ -75,9 +97,25 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - build
+      - build:
+          name: build_fixed
       - test:
+          name: test_fixed
           requires:
-            - build
-      - cross_build
+            - build_fixed
+
+      - build:
+          name: build_stable
+          rust: stable
+      - test:
+          name: test_stable
+          rust: stable
+          requires:
+            - build_stable
+
+      - cross_build:
+          name: cross_build_fixed
+      - cross_build:
+          name: cross_build_stable
+          rust: stable
 
