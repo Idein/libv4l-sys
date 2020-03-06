@@ -1,5 +1,14 @@
 version: 2.1
 
+executors:
+  rust-executor:
+    docker:
+      - image: rust:1.36.0-buster
+    working_directory: /tmp/libv4l_sys
+    environment:
+      LIBCLANG_INCLUDE_PATH: /usr/include/clang/7/include
+
+
 constants:
   parameter-rust-version: &parameter-rust-version
     rust:
@@ -10,11 +19,7 @@ jobs:
   build:
     parameters:
       <<: *parameter-rust-version
-    working_directory: /tmp/libv4l_sys
-    docker:
-      - image: rust:1.36.0-buster
-        environment:
-          LIBCLANG_INCLUDE_PATH: /usr/include/clang/7/include
+    executor: rust-executor
     steps:
       - checkout
       - run: git merge --no-edit origin/master
@@ -35,11 +40,7 @@ jobs:
   test:
     parameters:
       <<: *parameter-rust-version
-    working_directory: /tmp/libv4l_sys
-    docker:
-      - image: rust:1.36.0-buster
-        environment:
-          LIBCLANG_INCLUDE_PATH: /usr/include/clang/7/include
+    executor: rust-executor
     steps:
       - checkout
       - run: git merge --no-edit origin/master
@@ -60,14 +61,12 @@ jobs:
   cross_build:
     parameters:
       <<: *parameter-rust-version
-    working_directory: /tmp/libv4l_sys
-    docker:
-      - image: rust:1.36.0-buster
-        environment:
-          TARGET_ARCH: arm-unknown-linux-gnueabihf
-          LIBCLANG_INCLUDE_PATH: /usr/include/clang/7/include
-          PKG_CONFIG_PATH: /usr/lib/arm-linux-gnueabihf/pkgconfig
-          PKG_CONFIG_ALLOW_CROSS: 1
+    executor: rust-executor
+    environment:
+      TARGET_ARCH: arm-unknown-linux-gnueabihf
+      LIBCLANG_INCLUDE_PATH: /usr/include/clang/7/include
+      PKG_CONFIG_PATH: /usr/lib/arm-linux-gnueabihf/pkgconfig
+      PKG_CONFIG_ALLOW_CROSS: 1
     steps:
       - checkout
       - run: git merge --no-edit origin/master
