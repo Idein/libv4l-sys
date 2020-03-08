@@ -1,7 +1,7 @@
 [package]
 name = "libv4l-sys"
 description = "A FFI to libv4l"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["takayuki goto <takayuki@idein.jp>"]
 edition = "2018"
 license = "Apache-2.0"
