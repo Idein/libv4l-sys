@@ -18,6 +18,17 @@ constants:
       type: string
       default: "1.36.0"
 
+commands:
+  setup_docker_compose:
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - checkout
+      - run:
+          name: Install git
+          command: apk add --update --no-cache git
+      - run: git merge --no-edit origin/master
+
 jobs:
   build:
     parameters:
@@ -66,14 +77,7 @@ jobs:
       <<: *parameter-rust-version
     executor: default
     steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - checkout
-      - run:
-          name: Install git
-          command: |
-            apk add --update --no-cache git
-      - run: git merge --no-edit origin/master
+      - setup_docker_compose
       - run:
           name: Cross build w/ rustc ver. << parameters.rust >>
           environment:
