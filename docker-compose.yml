@@ -1,9 +1,9 @@
 version: '3.4'
 
 services:
-  cross-rpi-rust: &cross-rust-env
+  cross-armhf-rust: &cross-armhf-rust-env
     image: rust:1.36.0-buster
-    container_name: cross-rpi-rust
+    container_name: cross-armhf-rust
     environment:
       TARGET_ARCH: 'arm-unknown-linux-gnueabihf'
       LIBCLANG_INCLUDE_PATH: '/usr/include/clang/7/include'
@@ -14,9 +14,9 @@ services:
       - cargo-cache:/tmp/.cargo
     working_dir: /tmp/libv4l_sys
 
-  # build project for RaspberryPi
-  cross-build:
-    << : *cross-rust-env
+  # build project for Debian/armhf architecture (mainly for RaspberryPi series).
+  cross-build-armhf:
+    << : *cross-armhf-rust-env
     command: |
       bash -c "
       dpkg --add-architecture armhf
