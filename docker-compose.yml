@@ -1,33 +1,16 @@
 version: '3.4'
 
 services:
-  cross-rpi-rust: &cross-rust-env
-    image: rust:1.36.0-buster
-    container_name: cross-rpi-rust
-    environment:
-      TARGET_ARCH: 'arm-unknown-linux-gnueabihf'
-      LIBCLANG_INCLUDE_PATH: '/usr/include/clang/7/include'
-      PKG_CONFIG_PATH: '/usr/lib/arm-linux-gnueabihf/pkgconfig'
-      PKG_CONFIG_ALLOW_CROSS: 1
-    volumes:
-      - .:/tmp/libv4l_sys
-      - cargo-cache:/tmp/.cargo
-    working_dir: /tmp/libv4l_sys
-
-  # build project for RaspberryPi
-  cross-build:
-    << : *cross-rust-env
+  cross-build-rpi:
+    container_name: cross-build-rpi
+    build:
+      context: .
+      args:
+        - RUST_VER=${RUST_VER}
+        - TARGET_ARCH=${TARGET_ARCH}
     command: |
-      bash -c "
-      dpkg --add-architecture armhf
-      apt-get update -y
-      apt-get install -y libv4l-dev:armhf libclang-common-7-dev:armhf libclang-7-dev:armhf
-      apt-get install -y gcc-arm-linux-gnueabihf libclang-7-dev
-      rustup target add $${TARGET_ARCH}
-      cargo build --target=$${TARGET_ARCH}
-      cargo build --target=$${TARGET_ARCH} --example v4l2grab
+      bash -xc "
+      rustup override set ${RUST_VER}
+      cargo build --target=${TARGET_ARCH}
+      cargo build --target=${TARGET_ARCH} --examples
       "
-
-
-volumes:
-  cargo-cache:

@@ -1,13 +1,16 @@
 version: 2.1
 
 executors:
+  default:
+    docker:
+      - image: docker/compose
+    working_directory: /tmp/libv4l_sys
   rust-executor:
     docker:
       - image: rust:1.36.0-buster
     working_directory: /tmp/libv4l_sys
     environment:
       LIBCLANG_INCLUDE_PATH: /usr/include/clang/7/include
-
 
 constants:
   parameter-rust-version: &parameter-rust-version
@@ -61,35 +64,22 @@ jobs:
   cross_build:
     parameters:
       <<: *parameter-rust-version
-    executor: rust-executor
-    environment:
-      TARGET_ARCH: arm-unknown-linux-gnueabihf
-      LIBCLANG_INCLUDE_PATH: /usr/include/clang/7/include
-      PKG_CONFIG_PATH: /usr/lib/arm-linux-gnueabihf/pkgconfig
-      PKG_CONFIG_ALLOW_CROSS: 1
+    executor: default
     steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
       - checkout
+      - run:
+          name: Install git
+          command: |
+            apk add --update --no-cache git
       - run: git merge --no-edit origin/master
       - run:
-          name: Setup Packages
-          command: |
-            dpkg --add-architecture armhf
-            apt-get update -y
-            apt-get install -y libv4l-dev:armhf libclang-common-7-dev:armhf libclang-7-dev:armhf
-            apt-get install -y gcc-arm-linux-gnueabihf libclang-7-dev
-      - run:
-          name: Install Rust for ARM
-          command: |
-            rustup default << parameters.rust >>
-            rustup target add ${TARGET_ARCH}
-      - run:
-          name: Build crate
-          command: |
-            cargo build --target=${TARGET_ARCH}
-      - run:
-          name: Build example
-          command: |
-            cargo build --target=${TARGET_ARCH} --example v4l2grab
+          name: Cross build w/ rustc ver. << parameters.rust >>
+          environment:
+            RUST_VER: << parameters.rust >>
+            TARGET_ARCH: arm-unknown-linux-gnueabihf
+          command: docker-compose run --rm cross-build-rpi
 
 
 workflows:
@@ -117,4 +107,3 @@ workflows:
       - cross_build:
           name: cross_build_stable
           rust: stable
-
