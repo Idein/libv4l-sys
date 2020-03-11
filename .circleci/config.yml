@@ -45,23 +45,14 @@ jobs:
   test:
     parameters:
       <<: *parameter-rust-version
-    executor: rust-executor
+    executor: default
     steps:
-      - checkout
-      - run: git merge --no-edit origin/master
+      - setup_docker_compose
       - run:
-          name: Setup Packages
-          command: |
-            apt-get update -y
-            apt-get install -y libclang-7-dev libv4l-dev
-      - run:
-          name: Setup Rust
-          command: |
-            rustup default << parameters.rust >>
-      - run:
-          name: Cargo test
-          command: |
-            cargo test
+          name: Test w/ rustc ver. << parameters.rust >>
+          environment:
+            RUST_VER: << parameters.rust >>
+          command: docker-compose run --rm libv4l-test
 
   cross_build:
     parameters:
