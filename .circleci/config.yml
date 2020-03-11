@@ -58,8 +58,9 @@ jobs:
           name: Cross build w/ rustc ver. << parameters.rust >>
           environment:
             RUST_CHANNEL: << parameters.rust >>
-          command: docker-compose run --rm libv4l-build-cross-armhf
-
+          command: |
+            docker-compose build libv4l-build-cross-armhf
+            docker-compose run --rm libv4l-build-cross-armhf
 
 workflows:
   version: 2
