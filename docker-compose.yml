@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: dockerfiles/docker-libv4l-build/Dockerfile
       args:
-        - RUST_CHANNEL=${RUST_CHANNEL}
+        - RUST_CHANNEL=${RUST_CHANNEL:-stable}
     command: |
       bash -xc "
       rustc --version
@@ -21,7 +21,7 @@ services:
       context: .
       dockerfile: dockerfiles/docker-libv4l-build/Dockerfile
       args:
-        - RUST_CHANNEL=${RUST_CHANNEL}
+        - RUST_CHANNEL=${RUST_CHANNEL:-stable}
     command: |
       bash -xc "
       rustc --version
@@ -34,7 +34,7 @@ services:
       context: .
       dockerfile: dockerfiles/docker-libv4l-build-cross-armhf/Dockerfile
       args:
-        - RUST_CHANNEL=${RUST_CHANNEL}
+        - RUST_CHANNEL=${RUST_CHANNEL:-stable}
     command: |
       bash -xc "
       rustc --version
