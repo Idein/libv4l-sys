@@ -1,6 +1,20 @@
 version: '3.4'
 
 services:
+  libv4l-build:
+    container_name: libv4l-build
+    build:
+      context: .
+      dockerfile: dockerfiles/docker-libv4l-build/Dockerfile
+      args:
+        - RUST_VER=${RUST_VER}
+    command: |
+      bash -xc "
+      rustup override set ${RUST_VER}
+      cargo build
+      cargo build --examples
+      "
+
   libv4l-build-cross-armhf:
     container_name: libv4l-build-cross-armhf
     build:
