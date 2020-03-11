@@ -1,16 +1,16 @@
 version: '3.4'
 
 services:
-  cross-build-rpi:
-    container_name: cross-build-rpi
+  libv4l-build-cross-armhf:
+    container_name: libv4l-build-cross-armhf
     build:
       context: .
+      dockerfile: dockerfiles/docker-libv4l-build-cross-armhf/Dockerfile
       args:
         - RUST_VER=${RUST_VER}
-        - TARGET_ARCH=${TARGET_ARCH}
     command: |
       bash -xc "
       rustup override set ${RUST_VER}
-      cargo build --target=${TARGET_ARCH}
-      cargo build --target=${TARGET_ARCH} --examples
+      cargo build --target=arm-unknown-linux-gnueabihf
+      cargo build --target=arm-unknown-linux-gnueabihf --examples
       "

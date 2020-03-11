@@ -82,8 +82,7 @@ jobs:
           name: Cross build w/ rustc ver. << parameters.rust >>
           environment:
             RUST_VER: << parameters.rust >>
-            TARGET_ARCH: arm-unknown-linux-gnueabihf
-          command: docker-compose run --rm cross-build-rpi
+          command: docker-compose run --rm libv4l-build-cross-armhf
 
 
 workflows:
