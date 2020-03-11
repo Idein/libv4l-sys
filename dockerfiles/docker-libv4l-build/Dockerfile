@@ -1,5 +1,7 @@
 FROM rust:1.36.0-buster
 
+ENV LIBCLANG_INCLUDE_PATH '/usr/include/clang/7/include'
+
 ARG RUST_VER
 RUN test ${RUST_VER}
 
