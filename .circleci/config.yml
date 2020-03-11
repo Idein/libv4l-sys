@@ -66,6 +66,20 @@ jobs:
             docker-compose build libv4l-build-cross-armhf
             docker-compose run --rm libv4l-build-cross-armhf
 
+  cross_build_arm64:
+    parameters:
+      <<: *parameter-rust-version
+    executor: default
+    steps:
+      - setup_docker_compose
+      - run:
+          name: Cross build w/ rustc ver. << parameters.rust >>
+          environment:
+            RUST_CHANNEL: << parameters.rust >>
+          command: |
+            docker-compose build libv4l-build-cross-arm64
+            docker-compose run --rm libv4l-build-cross-arm64
+
 workflows:
   version: 2
   build_and_test:
@@ -90,4 +104,10 @@ workflows:
           name: cross_build_armhf_fixed
       - cross_build_armhf:
           name: cross_build_armhf_stable
+          rust: stable
+
+      - cross_build_arm64:
+          name: cross_build_arm64_fixed
+      - cross_build_arm64:
+          name: cross_build_arm64_stable
           rust: stable
