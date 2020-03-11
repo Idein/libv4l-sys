@@ -41,3 +41,17 @@ services:
       cargo build --target=arm-unknown-linux-gnueabihf
       cargo build --target=arm-unknown-linux-gnueabihf --examples
       "
+
+  libv4l-build-cross-arm64:
+    container_name: libv4l-build-cross-arm64
+    build:
+      context: .
+      dockerfile: dockerfiles/docker-libv4l-build-cross-arm64/Dockerfile
+      args:
+        - RUST_CHANNEL=${RUST_CHANNEL:-stable}
+    command: |
+      bash -xc "
+      rustc --version
+      cargo build --target=aarch64-unknown-linux-gnu
+      cargo build --target=aarch64-unknown-linux-gnu --examples
+      "
