@@ -1,4 +1,4 @@
-FROM rust:1.41.1-buster
+FROM rust:1.36.0-buster
 
 ENV LIBCLANG_INCLUDE_PATH '/usr/include/clang/7/include'
 ENV PKG_CONFIG_PATH '/usr/lib/arm-linux-gnueabihf/pkgconfig'
