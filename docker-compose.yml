@@ -37,7 +37,7 @@ services:
         - RUST_CHANNEL=${RUST_CHANNEL}
     command: |
       bash -xc "
-      rustup override set ${RUST_CHANNEL}-arm-unknown-linux-gnueabihf
+      rustup override set ${RUST_CHANNEL}
       cargo build --target=arm-unknown-linux-gnueabihf
       cargo build --target=arm-unknown-linux-gnueabihf --examples
       "
