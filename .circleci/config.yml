@@ -52,7 +52,7 @@ jobs:
             docker-compose build libv4l-test
             docker-compose run --rm libv4l-test
 
-  cross_build:
+  cross_build_armhf:
     parameters:
       <<: *parameter-rust-version
     executor: default
@@ -86,8 +86,8 @@ workflows:
           requires:
             - build_stable
 
-      - cross_build:
-          name: cross_build_fixed
-      - cross_build:
-          name: cross_build_stable
+      - cross_build_armhf:
+          name: cross_build_armhf_fixed
+      - cross_build_armhf:
+          name: cross_build_armhf_stable
           rust: stable
