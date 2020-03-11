@@ -51,3 +51,16 @@ cargo build
 (container)$ file target/arm-unknown-linux-gnueabihf/debug/liblibv4l_sys.rlib
 target/arm-unknown-linux-gnueabihf/debug/liblibv4l_sys.rlib: current ar archive
 ```
+
+### Into `aarch64-unknown-linux-gnu`
+
+```sh
+(host)$ docker-compose build libv4l-build-cross-arm64
+(host)$ docker-compose run --rm libv4l-build-cross-arm64  # Just check if build succeeds
+
+# Manually invoke build command inside container
+(host)$ docker-compose run --rm libv4l-build-cross-arm64 bash
+(container)$ cargo build --target=aarch64-unknown-linux-gnu
+(container)$ file target/aarch64-unknown-linux-gnu/debug/liblibv4l_sys.rlib
+file target/aarch64-unknown-linux-gnu/debug/liblibv4l_sys.rlib: current ar archive
+```
