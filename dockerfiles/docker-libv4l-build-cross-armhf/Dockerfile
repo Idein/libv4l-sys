@@ -14,7 +14,6 @@ RUN dpkg --add-architecture armhf \
     && apt-get install -y libv4l-dev:armhf libclang-common-7-dev:armhf libclang-7-dev:armhf \
     && apt-get install -y gcc-arm-linux-gnueabihf libclang-7-dev
 
-RUN rustup install ${RUST_VER} \
-    && rustup target add --toolchain ${RUST_VER} arm-unknown-linux-gnueabihf
+RUN rustup toolchain install ${RUST_VER}-arm-unknown-linux-gnueabihf
 
 COPY . /tmp/libv4l_sys
