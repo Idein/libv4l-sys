@@ -13,3 +13,5 @@ RUN apt-get update -y \
 RUN rustup toolchain install ${RUST_CHANNEL}
 
 COPY . /tmp/libv4l_sys
+
+RUN rustup override set ${RUST_CHANNEL}

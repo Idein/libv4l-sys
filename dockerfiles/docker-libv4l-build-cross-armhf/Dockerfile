@@ -18,3 +18,5 @@ RUN rustup toolchain install ${RUST_CHANNEL} \
     && rustup target add --toolchain ${RUST_CHANNEL} arm-unknown-linux-gnueabihf
 
 COPY . /tmp/libv4l_sys
+
+RUN rustup override set ${RUST_CHANNEL}
