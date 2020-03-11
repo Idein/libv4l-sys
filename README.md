@@ -7,37 +7,47 @@ Rust FFI wrapper to libv4l.
 
 ## Build
 
+### Build by docker-compose (RECOMMENDED)
+
+```sh
+(host)$ docker-compose build libv4l-build
+(host)$ docker-compose run --rm libv4l-build  # Just check if build succeeds
+
+# Manually invoke build command inside container
+(host)$ docker-compose run --rm libv4l-build bash
+(container)$ cargo build
+(container)$ file target/debug/liblibv4l_sys.rlib
+target/debug/liblibv4l_sys.rlib: current ar archive
+```
+
+### Native build (not RECOMMENDED)
+
+You need to install the dependencies by yourself:
+
+- libv4l (like `libv4l-dev`)
+- libclang-7 (like `libclang-7-dev`)
+
+And set the following environment variables:
+
+- LIBCLANG_INCLUDE_PATH (e.g. `export LIBCLANG_INCLUDE_PATH=/usr/include/clang/7/include`)
+
+Then execute:
+
 ```sh
 cargo build
 ```
 
-### Parameter
+## Cross Build
 
-You can specify some build parameters.
-
-- `LIBCLANG_INCLUDE_PATH`: Path to the system header directory
-
-    ```sh
-    LIBCLANG_INCLUDE_PATH=/usr/include/clang/7/include cargo build
-    ```
-
-### Cross build
-
-For cross compiling, some more configurations are required.
-
-#### Example (build for armhf)
+### Into `arm-unknown-linux-gnueabihf`
 
 ```sh
-libv4l-sys$ cat <<EOF > .cargo/config
-[target.arm-unknown-linux-gnueabihf]
-linker = "arm-rpi-linux-gnueabihf-gcc"
-rustflags = ["-C", "link-args=-Wl,-rpath-link,/usr/lib/arm-linux-gnueabihf"]
-EOF
-libv4l-sys$ export LIBCLANG_INCLUDE_PATH=/usr/include/clang/7/include
-libv4l-sys$ cargo build --target=arm-unknown-linux-gnueabihf
+(host)$ docker-compose build libv4l-build-cross-armhf
+(host)$ docker-compose run --rm libv4l-build-cross-armhf  # Just check if build succeeds
+
+# Manually invoke build command inside container
+(host)$ docker-compose run --rm libv4l-build-cross-armhf bash
+(container)$ cargo build --target=arm-unknown-linux-gnueabihf
+(container)$ file target/arm-unknown-linux-gnueabihf/debug/liblibv4l_sys.rlib
+target/arm-unknown-linux-gnueabihf/debug/liblibv4l_sys.rlib: current ar archive
 ```
-
-### Required package
-
-- libclang-7-dev
-- libv4l-dev

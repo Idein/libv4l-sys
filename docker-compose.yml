@@ -1,59 +1,43 @@
 version: '3.4'
 
 services:
-  cross-armhf-rust: &cross-armhf-rust-env
-    image: rust:1.36.0-buster
-    container_name: cross-armhf-rust
-    environment:
-      TARGET_ARCH: 'arm-unknown-linux-gnueabihf'
-      LIBCLANG_INCLUDE_PATH: '/usr/include/clang/7/include'
-      PKG_CONFIG_PATH: '/usr/lib/arm-linux-gnueabihf/pkgconfig'
-      PKG_CONFIG_ALLOW_CROSS: 1
-    volumes:
-      - .:/tmp/libv4l_sys
-      - cargo-cache:/tmp/.cargo
-    working_dir: /tmp/libv4l_sys
-
-  cross-arm64-rust: &cross-arm64-rust-env
-    image: rust:1.36.0-buster
-    container_name: cross-arm64-rust
-    environment:
-      TARGET_ARCH: 'aarch64-unknown-linux-gnu'
-      LIBCLANG_INCLUDE_PATH: '/usr/include/clang/7/include'
-      PKG_CONFIG_PATH: '/usr/lib/aarch64-linux-gnu/pkgconfig'
-      PKG_CONFIG_ALLOW_CROSS: 1
-    volumes:
-      - .:/tmp/libv4l_sys
-      - cargo-cache:/tmp/.cargo
-    working_dir: /tmp/libv4l_sys
-
-  # build project for Debian/armhf architecture (mainly for RaspberryPi series).
-  cross-build-armhf:
-    << : *cross-armhf-rust-env
+  libv4l-build:
+    container_name: libv4l-build
+    build:
+      context: .
+      dockerfile: dockerfiles/docker-libv4l-build/Dockerfile
+      args:
+        - RUST_CHANNEL=${RUST_CHANNEL:-stable}
     command: |
-      bash -c "
-      dpkg --add-architecture armhf
-      apt-get update -y
-      apt-get install -y libv4l-dev:armhf libclang-common-7-dev:armhf libclang-7-dev:armhf
-      apt-get install -y gcc-arm-linux-gnueabihf libclang-7-dev
-      rustup target add $${TARGET_ARCH}
-      cargo build --target=$${TARGET_ARCH}
-      cargo build --target=$${TARGET_ARCH} --example v4l2grab
+      bash -xc "
+      rustc --version
+      cargo build
+      cargo build --examples
       "
 
-  # build project for Debian/arm64 architecture (mainly for Jetson series).
-  cross-build-arm64:
-    << : *cross-arm64-rust-env
+  libv4l-test:
+    container_name: libv4l-build
+    build:
+      context: .
+      dockerfile: dockerfiles/docker-libv4l-build/Dockerfile
+      args:
+        - RUST_CHANNEL=${RUST_CHANNEL:-stable}
     command: |
-      bash -c "
-      dpkg --add-architecture arm64
-      apt-get update -y
-      apt-get install -y libv4l-dev:arm64 libclang-common-7-dev:arm64 libclang-7-dev:arm64
-      apt-get install -y gcc-aarch64-linux-gnu libclang-7-dev
-      rustup target add $${TARGET_ARCH}
-      cargo build --target=$${TARGET_ARCH}
-      cargo build --target=$${TARGET_ARCH} --example v4l2grab
+      bash -xc "
+      rustc --version
+      cargo test --all
       "
 
-volumes:
-  cargo-cache:
+  libv4l-build-cross-armhf:
+    container_name: libv4l-build-cross-armhf
+    build:
+      context: .
+      dockerfile: dockerfiles/docker-libv4l-build-cross-armhf/Dockerfile
+      args:
+        - RUST_CHANNEL=${RUST_CHANNEL:-stable}
+    command: |
+      bash -xc "
+      rustc --version
+      cargo build --target=arm-unknown-linux-gnueabihf
+      cargo build --target=arm-unknown-linux-gnueabihf --examples
+      "

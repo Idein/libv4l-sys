@@ -1,13 +1,10 @@
 version: 2.1
 
 executors:
-  rust-executor:
+  default:
     docker:
-      - image: rust:1.36.0-buster
+      - image: docker/compose
     working_directory: /tmp/libv4l_sys
-    environment:
-      LIBCLANG_INCLUDE_PATH: /usr/include/clang/7/include
-
 
 constants:
   parameter-rust-version: &parameter-rust-version
@@ -15,82 +12,59 @@ constants:
       type: string
       default: "1.36.0"
 
+commands:
+  setup_docker_compose:
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - checkout
+      - run:
+          name: Install git
+          command: apk add --update --no-cache git
+      - run: git merge --no-edit origin/master
+
 jobs:
   build:
     parameters:
       <<: *parameter-rust-version
-    executor: rust-executor
+    executor: default
     steps:
-      - checkout
-      - run: git merge --no-edit origin/master
+      - setup_docker_compose
       - run:
-          name: Setup Packages
+          name: Build w/ rustc ver. << parameters.rust >>
+          environment:
+            RUST_CHANNEL: << parameters.rust >>
           command: |
-            apt-get update -y
-            apt-get install -y libclang-7-dev libv4l-dev
-      - run:
-          name: Setup Rust
-          command: |
-            rustup default << parameters.rust >>
-      - run:
-          name: Build crate
-          command: |
-            cargo build
+            docker-compose build libv4l-build
+            docker-compose run --rm libv4l-build
 
   test:
     parameters:
       <<: *parameter-rust-version
-    executor: rust-executor
+    executor: default
     steps:
-      - checkout
-      - run: git merge --no-edit origin/master
+      - setup_docker_compose
       - run:
-          name: Setup Packages
+          name: Test w/ rustc ver. << parameters.rust >>
+          environment:
+            RUST_CHANNEL: << parameters.rust >>
           command: |
-            apt-get update -y
-            apt-get install -y libclang-7-dev libv4l-dev
-      - run:
-          name: Setup Rust
-          command: |
-            rustup default << parameters.rust >>
-      - run:
-          name: Cargo test
-          command: |
-            cargo test
+            docker-compose build libv4l-test
+            docker-compose run --rm libv4l-test
 
   cross_build:
     parameters:
       <<: *parameter-rust-version
-    executor: rust-executor
-    environment:
-      TARGET_ARCH: arm-unknown-linux-gnueabihf
-      LIBCLANG_INCLUDE_PATH: /usr/include/clang/7/include
-      PKG_CONFIG_PATH: /usr/lib/arm-linux-gnueabihf/pkgconfig
-      PKG_CONFIG_ALLOW_CROSS: 1
+    executor: default
     steps:
-      - checkout
-      - run: git merge --no-edit origin/master
+      - setup_docker_compose
       - run:
-          name: Setup Packages
+          name: Cross build w/ rustc ver. << parameters.rust >>
+          environment:
+            RUST_CHANNEL: << parameters.rust >>
           command: |
-            dpkg --add-architecture armhf
-            apt-get update -y
-            apt-get install -y libv4l-dev:armhf libclang-common-7-dev:armhf libclang-7-dev:armhf
-            apt-get install -y gcc-arm-linux-gnueabihf libclang-7-dev
-      - run:
-          name: Install Rust for ARM
-          command: |
-            rustup default << parameters.rust >>
-            rustup target add ${TARGET_ARCH}
-      - run:
-          name: Build crate
-          command: |
-            cargo build --target=${TARGET_ARCH}
-      - run:
-          name: Build example
-          command: |
-            cargo build --target=${TARGET_ARCH} --example v4l2grab
-
+            docker-compose build libv4l-build-cross-armhf
+            docker-compose run --rm libv4l-build-cross-armhf
 
 workflows:
   version: 2
@@ -117,4 +91,3 @@ workflows:
       - cross_build:
           name: cross_build_stable
           rust: stable
-
