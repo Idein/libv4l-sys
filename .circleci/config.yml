@@ -34,7 +34,9 @@ jobs:
           name: Build w/ rustc ver. << parameters.rust >>
           environment:
             RUST_CHANNEL: << parameters.rust >>
-          command: docker-compose run --rm libv4l-build
+          command: |
+            docker-compose build libv4l-build
+            docker-compose run --rm libv4l-build
 
   test:
     parameters:
@@ -46,7 +48,9 @@ jobs:
           name: Test w/ rustc ver. << parameters.rust >>
           environment:
             RUST_CHANNEL: << parameters.rust >>
-          command: docker-compose run --rm libv4l-test
+          command: |
+            docker-compose build libv4l-test
+            docker-compose run --rm libv4l-test
 
   cross_build:
     parameters:
