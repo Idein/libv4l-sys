@@ -33,7 +33,7 @@ jobs:
       - run:
           name: Build w/ rustc ver. << parameters.rust >>
           environment:
-            RUST_VER: << parameters.rust >>
+            RUST_CHANNEL: << parameters.rust >>
           command: docker-compose run --rm libv4l-build
 
   test:
@@ -45,7 +45,7 @@ jobs:
       - run:
           name: Test w/ rustc ver. << parameters.rust >>
           environment:
-            RUST_VER: << parameters.rust >>
+            RUST_CHANNEL: << parameters.rust >>
           command: docker-compose run --rm libv4l-test
 
   cross_build:
@@ -57,7 +57,7 @@ jobs:
       - run:
           name: Cross build w/ rustc ver. << parameters.rust >>
           environment:
-            RUST_VER: << parameters.rust >>
+            RUST_CHANNEL: << parameters.rust >>
           command: docker-compose run --rm libv4l-build-cross-armhf
 
 

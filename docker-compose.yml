@@ -7,10 +7,10 @@ services:
       context: .
       dockerfile: dockerfiles/docker-libv4l-build/Dockerfile
       args:
-        - RUST_VER=${RUST_VER}
+        - RUST_CHANNEL=${RUST_CHANNEL}
     command: |
       bash -xc "
-      rustup override set ${RUST_VER}
+      rustup override set ${RUST_CHANNEL}
       cargo build
       cargo build --examples
       "
@@ -21,10 +21,10 @@ services:
       context: .
       dockerfile: dockerfiles/docker-libv4l-build/Dockerfile
       args:
-        - RUST_VER=${RUST_VER}
+        - RUST_CHANNEL=${RUST_CHANNEL}
     command: |
       bash -xc "
-      rustup override set ${RUST_VER}
+      rustup override set ${RUST_CHANNEL}
       cargo test --all
       "
 
@@ -34,10 +34,10 @@ services:
       context: .
       dockerfile: dockerfiles/docker-libv4l-build-cross-armhf/Dockerfile
       args:
-        - RUST_VER=${RUST_VER}
+        - RUST_CHANNEL=${RUST_CHANNEL}
     command: |
       bash -xc "
-      rustup override set ${RUST_VER}
+      rustup override set ${RUST_CHANNEL}
       cargo build --target=arm-unknown-linux-gnueabihf
       cargo build --target=arm-unknown-linux-gnueabihf --examples
       "
