@@ -38,6 +38,6 @@ services:
     command: |
       bash -xc "
       rustc --version
-      cargo build --target=arm-unknown-linux-gnueabihf || cargo build --target=arm-unknown-linux-gnueabihf  # FIXME: build fails in 1st build... https://app.circleci.com/pipelines/github/Idein/libv4l-sys/102/workflows/2e538f9c-c15a-4798-bc58-c9a7ac0c5faf/jobs/334
+      cargo build --target=arm-unknown-linux-gnueabihf
       cargo build --target=arm-unknown-linux-gnueabihf --examples
       "
