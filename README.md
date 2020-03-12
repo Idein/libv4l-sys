@@ -7,7 +7,7 @@ Rust FFI wrapper to libv4l.
 
 ## Build
 
-### Build by docker-compose (RECOMMENDED)
+### Build by docker-compose
 
 ```sh
 (host)$ docker-compose build libv4l-build
@@ -20,7 +20,7 @@ Rust FFI wrapper to libv4l.
 target/debug/liblibv4l_sys.rlib: current ar archive
 ```
 
-### Native build (not RECOMMENDED)
+### Native build
 
 You need to install the dependencies by yourself:
 
