@@ -116,7 +116,7 @@ macro_rules! fourcc_be {
 }
 
 pub mod pixel_format {
-    ///        Pixel format         FOURCC                          depth  Description
+    /// Pixel format         FOURCC                          depth  Description
 
     /// RGB formats
     mod rgb {
@@ -528,10 +528,8 @@ mod test {
 
     #[test]
     fn make_fourcc() {
-        let V4L2_PIX_FMT_RGB24: u32 = ((b'R' as u32) << 0)
-            | ((b'G' as u32) << 8)
-            | ((b'B' as u32) << 16)
-            | ((b'3' as u32) << 24);
+        let V4L2_PIX_FMT_RGB24: u32 =
+            (b'R' as u32) | ((b'G' as u32) << 8) | ((b'B' as u32) << 16) | ((b'3' as u32) << 24);
 
         assert_eq!(pixel_format::V4L2_PIX_FMT_RGB24, V4L2_PIX_FMT_RGB24);
     }

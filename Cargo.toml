@@ -3,7 +3,7 @@ name = "libv4l-sys"
 description = "A FFI to libv4l"
 version = "0.2.2"
 authors = ["takayuki goto <takayuki@idein.jp>"]
-edition = "2018"
+edition = "2021"
 license = "Apache-2.0"
 homepage = "https://github.com/idein/libv4l-sys"
 repository = "https://github.com/idein/libv4l-sys"
@@ -20,7 +20,7 @@ maintenance = { status = "experimental" }
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-bindgen = "0.51"
+bindgen = "0.65.1"
 pkg-config = "0.3"
 
 [dependencies]
@@ -29,5 +29,5 @@ libc = "0.2"
 [dev-dependencies]
 libc = "0.2"
 log = "0.4"
-env_logger = "0.6"
+env_logger = "0.10"
 

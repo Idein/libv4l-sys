@@ -29,7 +29,7 @@ impl fmt::Display for Framesize {
 }
 
 #[derive(Debug)]
-struct buffer {
+struct Buffer {
     start: *mut libc::c_void,
     length: libc::size_t,
 }
@@ -133,10 +133,10 @@ fn main() {
             &mut buf as *mut _ as *mut libc::c_void,
         );
         let buffer = unsafe {
-            buffer {
+            Buffer {
                 start: v4l::v4l2_mmap(
                     ptr::null_mut(),
-                    buf.length as usize,
+                    buf.length.try_into().unwrap(),
                     libc::PROT_READ | libc::PROT_WRITE,
                     libc::MAP_SHARED,
                     fd,
@@ -223,7 +223,8 @@ fn main() {
                 "P6\n{} {} 255\n",
                 unsafe { fmt.fmt.pix.width },
                 unsafe { fmt.fmt.pix.height }
-            );
+            )
+            .unwrap();
 
             unsafe {
                 fout.write_all(slice::from_raw_parts(
