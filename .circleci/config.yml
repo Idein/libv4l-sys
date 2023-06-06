@@ -3,7 +3,7 @@ version: 2.1
 executors:
   rust-executor:
     docker:
-      - image: rust:1.36.0-buster
+      - image: rust:1.70.0-buster
     working_directory: /tmp/libv4l_sys
     environment:
       LIBCLANG_INCLUDE_PATH: /usr/include/clang/7/include
@@ -13,7 +13,7 @@ constants:
   parameter-rust-version: &parameter-rust-version
     rust:
       type: string
-      default: "1.36.0"
+      default: "1.70.0"
 
 jobs:
   build:
